@@ -8,21 +8,21 @@ import (
 
 type ID [16]byte
 
-var NilId ID
+var NilID ID
 
-func NewId() ID {
+func NewID() ID {
 	return ID(ulid.Make())
 }
 
-func IdFromString(val string) (ID, error) {
+func FromString(val string) (ID, error) {
 	ulidVal, err := ulid.ParseStrict(val)
 	if err != nil {
-		return NilId, err
+		return NilID, err
 	}
 	return ID(ulidVal), nil
 }
 
-func IsValidId(val string) bool {
+func IsValidID(val string) bool {
 	_, err := ulid.ParseStrict(val)
 	if err != nil {
 		return false
@@ -35,7 +35,7 @@ func (id ID) String() string {
 }
 
 func (id ID) IsZero() bool {
-	return id == NilId
+	return id == NilID
 }
 
 // MarshalText returns the IDX as UTF-8-encoded text. Implementing this allows us to use IDX

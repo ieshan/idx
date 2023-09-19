@@ -15,16 +15,16 @@ import (
 	"testing"
 )
 
-func TestNewId(t *testing.T) {
-	id := NewId()
-	if id == NilId {
+func TestNewID(t *testing.T) {
+	id := NewID()
+	if id == NilID {
 		t.Fatalf("%s is NilId", id.String())
 	}
 }
 
-func TestIdFromString(t *testing.T) {
-	id := NewId()
-	idFromStr, err := IdFromString(id.String())
+func TestFromString(t *testing.T) {
+	id := NewID()
+	idFromStr, err := FromString(id.String())
 	if err != nil {
 		t.Fatalf("Got error while creating ID from String %v", err)
 	}
@@ -33,22 +33,22 @@ func TestIdFromString(t *testing.T) {
 	}
 	invalidIds := []string{"null", "wrong", "00000", "01HAJ2Q3T69IJMMBDNAMVZ3FQB"}
 	for _, val := range invalidIds {
-		_, err = IdFromString(val)
+		_, err = FromString(val)
 		if err == nil {
 			t.Fatalf("Was expecting error, not there was no error")
 		}
 	}
 }
 
-func TestIsValidId(t *testing.T) {
-	id := NewId()
-	if !IsValidId(id.String()) {
+func TestIsValidID(t *testing.T) {
+	id := NewID()
+	if !IsValidID(id.String()) {
 		t.Fatal("Expecting to be valid, but it's invalid")
 	}
 
 	invalidIds := []string{"null", "wrong", "00000", "01HAJ2Q3T69IJMMBDNAMVZ3FQB"}
 	for _, val := range invalidIds {
-		if IsValidId(val) {
+		if IsValidID(val) {
 			t.Fatalf("Expecting to be invalid, but it's valid")
 		}
 	}
@@ -58,7 +58,7 @@ func TestID_MarshalJSON(t *testing.T) {
 	type IdTestStruct struct {
 		Id ID `json:"id"`
 	}
-	id := NewId()
+	id := NewID()
 	jsonVal, err := json.Marshal(&IdTestStruct{Id: id})
 	if err != nil {
 		t.Fatalf("Got error while marshaling to JSON %v", err)
@@ -71,9 +71,9 @@ func TestID_MarshalJSON(t *testing.T) {
 
 func TestID_UnmarshalJSON(t *testing.T) {
 	type IdTestStruct struct {
-		Id ID `json:"id"`
+		ID ID `json:"id"`
 	}
-	id := NewId()
+	id := NewID()
 	jsonStrs := []string{
 		`{"id":"01HAK8JPF7S0SFMJ2X96W37WXI"}`,
 		`{"id":null}`,
@@ -81,9 +81,9 @@ func TestID_UnmarshalJSON(t *testing.T) {
 		fmt.Sprintf(`{"id":"%s"}`, id.String()),
 	}
 	idVals := []ID{
-		NilId,
-		NilId,
-		NilId,
+		NilID,
+		NilID,
+		NilID,
 		id,
 	}
 	errVals := []error{
@@ -97,15 +97,15 @@ func TestID_UnmarshalJSON(t *testing.T) {
 		if err := json.Unmarshal([]byte(str), &unmVal); !errors.Is(err, errVals[index]) {
 			t.Fatalf("Error did not match expectation %v : %v", err, errVals[index])
 		}
-		if unmVal.Id != idVals[index] {
-			t.Fatalf("Original ID (%s) did not match with the ID from JSON %s %d", idVals[index].String(), unmVal.Id.String(), index)
+		if unmVal.ID != idVals[index] {
+			t.Fatalf("Original ID (%s) did not match with the ID from JSON %s %d", idVals[index].String(), unmVal.ID.String(), index)
 		}
 	}
 }
 
 func TestIdForMongo(t *testing.T) {
 	type IdTestStruct struct {
-		Id    ID     `bson:"_id"`
+		ID    ID     `bson:"_id"`
 		Value string `bson:"value"`
 	}
 
@@ -127,7 +127,7 @@ func TestIdForMongo(t *testing.T) {
 	}()
 
 	data := IdTestStruct{
-		Id:    NewId(),
+		ID:    NewID(),
 		Value: "test-1",
 	}
 	_, err = db.InsertOne(c, &data)
@@ -136,27 +136,27 @@ func TestIdForMongo(t *testing.T) {
 	}
 
 	var actualData IdTestStruct
-	if err = db.FindOne(c, bson.D{{"_id", data.Id}}).Decode(&actualData); err != nil {
+	if err = db.FindOne(c, bson.D{{"_id", data.ID}}).Decode(&actualData); err != nil {
 		t.Fatalf("Error retrieving record: %v", err)
 	}
-	if data.Id != actualData.Id || data.Value != actualData.Value {
+	if data.ID != actualData.ID || data.Value != actualData.Value {
 		t.Fatalf("Original value did not match with actual value")
 	}
 
-	if _, err = db.UpdateOne(c, bson.D{{"_id", data.Id}}, bson.D{{"$set", bson.D{{"value", "test-2"}}}}); err != nil {
+	if _, err = db.UpdateOne(c, bson.D{{"_id", data.ID}}, bson.D{{"$set", bson.D{{"value", "test-2"}}}}); err != nil {
 		t.Fatalf("Error updating record: %v", err)
 	}
-	if err = db.FindOne(c, bson.D{{"_id", data.Id}}).Decode(&actualData); err != nil {
+	if err = db.FindOne(c, bson.D{{"_id", data.ID}}).Decode(&actualData); err != nil {
 		t.Fatalf("Error retrieving record: %v", err)
 	}
-	if data.Id != actualData.Id || actualData.Value != "test-2" {
+	if data.ID != actualData.ID || actualData.Value != "test-2" {
 		t.Fatalf("Original value did not match with actual value")
 	}
 
-	if _, err = db.DeleteOne(c, bson.D{{"_id", data.Id}}); err != nil {
+	if _, err = db.DeleteOne(c, bson.D{{"_id", data.ID}}); err != nil {
 		t.Fatalf("Error deleting record: %v", err)
 	}
-	if err = db.FindOne(c, bson.D{{"_id", data.Id}}).Decode(&actualData); !errors.Is(err, mongo.ErrNoDocuments) {
+	if err = db.FindOne(c, bson.D{{"_id", data.ID}}).Decode(&actualData); !errors.Is(err, mongo.ErrNoDocuments) {
 		t.Fatalf("Was expecting no document error, got %v", err)
 	}
 }
@@ -199,7 +199,7 @@ func TestIdForMySQL(t *testing.T) {
 		t.Fatalf("MySQL table creation error: %v", err)
 	}
 	data := IdTestStruct{
-		ID:    NewId(),
+		ID:    NewID(),
 		Value: "test-1",
 	}
 	if err = db.Create(&data).Error; err != nil {
@@ -276,7 +276,7 @@ func TestIdForPostgres(t *testing.T) {
 		t.Fatalf("Postgres table creation error: %v", err)
 	}
 	data := IdTestStruct{
-		ID:    NewId(),
+		ID:    NewID(),
 		Value: "test-1",
 	}
 	if err = db.Create(&data).Error; err != nil {
