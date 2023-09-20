@@ -94,7 +94,8 @@ func (id *ID) UnmarshalJSON(b []byte) error {
 	if idLen == 2 && b[0] == 0x22 && b[1] == 0x22 {
 		return nil
 	}
-	if idLen == 4 && string(b) == "null" {
+	// If the value is "null"
+	if idLen == 4 && b[0] == 0x6E && b[1] == 0x75 && b[2] == 0x6C && b[3] == 0x6C {
 		return nil
 	}
 	if idLen == 28 {
