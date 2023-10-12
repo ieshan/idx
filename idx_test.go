@@ -163,8 +163,9 @@ func TestIdForMongo(t *testing.T) {
 
 func TestIdForMySQL(t *testing.T) {
 	type IdTestStruct struct {
-		ID    ID     `gorm:"primaryKey,type:binary(16),column:id"`
-		Value string `gorm:"type:text not null,column:value"`
+		ID    ID     `gorm:"column:id"`
+		FkID  ID     `gorm:"column:fk_id"`
+		Value string `gorm:"column:value"`
 	}
 	dsn := "root:password@tcp(mariadb:3306)/?charset=utf8mb4&parseTime=True&loc=UTC"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -192,6 +193,7 @@ func TestIdForMySQL(t *testing.T) {
 	CREATE TABLE IF NOT EXISTS id_test_structs (
   		id binary(16) NOT NULL,
   		value text NOT NULL,
+	    fk_id binary(16) DEFAULT NULL,
   		PRIMARY KEY (id)
 	)ENGINE=InnoDB;
 	`
@@ -202,27 +204,30 @@ func TestIdForMySQL(t *testing.T) {
 		ID:    NewID(),
 		Value: "test-1",
 	}
+	// Test create
 	if err = db.Create(&data).Error; err != nil {
 		t.Fatalf("Error while creating: %v", err)
 	}
+	// Test retrieve
 	result := IdTestStruct{}
 	if err = db.First(&result, "id = ?", data.ID).Error; err != nil {
 		t.Fatalf("Error while selecting: %v", err)
 	}
-	if data.ID != result.ID || data.Value != result.Value {
+	if data.ID != result.ID || data.Value != result.Value || data.FkID != NilID {
 		t.Fatalf("Original value did not match with actual value")
 	}
-
-	if err = db.Model(&data).Where("id = ?", data.ID).Update("value", "test-2").Error; err != nil {
+	// Test update
+	newTestId := NewID()
+	if err = db.Model(&data).Where("id = ?", data.ID).Updates(map[string]interface{}{"value": "test-2", "fk_id": newTestId}).Error; err != nil {
 		t.Fatalf("Error while updating: %v", err)
 	}
 	if err = db.First(&result, "id = ?", data.ID).Error; err != nil {
 		t.Fatalf("Error while selecting: %v", err)
 	}
-	if data.ID != result.ID || result.Value != "test-2" {
+	if data.ID != result.ID || result.Value != "test-2" || result.FkID != newTestId {
 		t.Fatalf("Updated record value did not match")
 	}
-
+	// Test delete
 	if err = db.Where("id = ?", data.ID).Delete(&data).Error; err != nil {
 		t.Fatalf("Error while deleting: %v", err)
 	}
@@ -233,8 +238,9 @@ func TestIdForMySQL(t *testing.T) {
 
 func TestIdForPostgres(t *testing.T) {
 	type IdTestStruct struct {
-		ID    ID     `gorm:"primaryKey,type:bin(128),column:id"`
-		Value string `gorm:"type:text not null,column:value"`
+		ID    ID     `gorm:"column:id"`
+		FkID  ID     `gorm:"column:fk_id"`
+		Value string `gorm:"column:value"`
 	}
 	dsnOp := "host=postgres user=postgres password=password port=5432 sslmode=disable TimeZone=UTC"
 	dbOp, err := gorm.Open(postgres.Open(dsnOp), &gorm.Config{})
@@ -269,6 +275,7 @@ func TestIdForPostgres(t *testing.T) {
 		CREATE TABLE IF NOT EXISTS id_test_structs (
 	  		id bytea NOT NULL,
 	  		value text NOT NULL,
+	  		fk_id bytea DEFAULT NULL,
 	  		PRIMARY KEY (id)
 		);
 	`
@@ -279,9 +286,11 @@ func TestIdForPostgres(t *testing.T) {
 		ID:    NewID(),
 		Value: "test-1",
 	}
+	// Test create
 	if err = db.Create(&data).Error; err != nil {
 		t.Fatalf("Error while creating: %v", err)
 	}
+	// Test retrieve
 	result := IdTestStruct{}
 	if err = db.First(&result, "id = ?", data.ID).Error; err != nil {
 		t.Fatalf("Error while selecting: %v", err)
@@ -289,17 +298,18 @@ func TestIdForPostgres(t *testing.T) {
 	if data.ID != result.ID || data.Value != result.Value {
 		t.Fatalf("Original value did not match with actual value")
 	}
-
-	if err = db.Model(&data).Where("id = ?", data.ID).Update("value", "test-2").Error; err != nil {
+	// Test update
+	newTestId := NewID()
+	if err = db.Model(&data).Where("id = ?", data.ID).Updates(map[string]interface{}{"value": "test-2", "fk_id": newTestId}).Error; err != nil {
 		t.Fatalf("Error while updating: %v", err)
 	}
 	if err = db.First(&result, "id = ?", data.ID).Error; err != nil {
 		t.Fatalf("Error while selecting: %v", err)
 	}
-	if data.ID != result.ID || result.Value != "test-2" {
+	if data.ID != result.ID || result.Value != "test-2" || result.FkID != newTestId {
 		t.Fatalf("Updated record value did not match")
 	}
-
+	// Test delete
 	if err = db.Where("id = ?", data.ID).Delete(&data).Error; err != nil {
 		t.Fatalf("Error while deleting: %v", err)
 	}

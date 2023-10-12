@@ -110,6 +110,10 @@ func (id *ID) UnmarshalJSON(b []byte) error {
 // Scan implements the sql.Scanner interface. It supports scanning
 // a string or byte slice.
 func (id *ID) Scan(src interface{}) error {
+	// If value is nil, set the ID to NilID
+	if src == nil {
+		copy(id[:], NilID[:])
+	}
 	return (*ulid.ULID)(id).Scan(src)
 }
 
@@ -145,6 +149,10 @@ func (id *ID) Scan(src interface{}) error {
 //	// Example usage.
 //	db.Exec("...", invalidZeroValuer(id))
 func (id ID) Value() (driver.Value, error) {
+	// If the ID is NilID, return nil
+	if id == NilID {
+		return nil, nil
+	}
 	return ulid.ULID(id).Value()
 }
 
