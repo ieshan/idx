@@ -10,6 +10,8 @@ type ID [16]byte
 
 var NilID ID
 
+var NotNullNilId = ID([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
+
 func NewID() ID {
 	return ID(ulid.Make())
 }
@@ -36,6 +38,10 @@ func (id ID) String() string {
 
 func (id ID) IsZero() bool {
 	return id == NilID
+}
+
+func (id ID) Compare(y ID) int {
+	return ulid.ULID(id).Compare(ulid.ULID(y))
 }
 
 // MarshalText returns the IDX as UTF-8-encoded text. Implementing this allows us to use IDX

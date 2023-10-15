@@ -22,6 +22,24 @@ func TestNewID(t *testing.T) {
 	}
 }
 
+func TestCompare(t *testing.T) {
+	if NilID.Compare(NilID) != 0 {
+		t.Fatalf("NilID should be equal to NilID")
+	}
+	if NilID.Compare(NotNullNilId) != -1 {
+		t.Fatalf("NilID should be less than NotNullNilId")
+	}
+	if NotNullNilId.Compare(NilID) != 1 {
+		t.Fatalf("NotNullNilId should be greater than NilID")
+	}
+	if NotNullNilId.Compare(NotNullNilId) != 0 {
+		t.Fatalf("NotNullNilId should be equal to NotNullNilId")
+	}
+	if NotNullNilId.Compare([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2}) != -1 {
+		t.Fatalf("NotNullNilId should be less")
+	}
+}
+
 func TestFromString(t *testing.T) {
 	id := NewID()
 	idFromStr, err := FromString(id.String())
@@ -63,7 +81,6 @@ func TestID_MarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Got error while marshaling to JSON %v", err)
 	}
-	fmt.Println(string(jsonVal))
 	if string(jsonVal) != fmt.Sprintf(`{"id":"%s"}`, id.String()) {
 		t.Fatalf("Original ID (%s) did not match with the ID in generated JSON %s", id.String(), string(jsonVal))
 	}
@@ -130,8 +147,7 @@ func TestIdForMongo(t *testing.T) {
 		ID:    NewID(),
 		Value: "test-1",
 	}
-	_, err = db.InsertOne(c, &data)
-	if err != nil {
+	if _, err = db.InsertOne(c, &data); err != nil {
 		t.Fatalf("Error inserting record: %v", err)
 	}
 
@@ -231,6 +247,7 @@ func TestIdForMySQL(t *testing.T) {
 	if err = db.Where("id = ?", data.ID).Delete(&data).Error; err != nil {
 		t.Fatalf("Error while deleting: %v", err)
 	}
+	result = IdTestStruct{}
 	if err = db.First(&result, "id = ?", data.ID).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		t.Fatalf("Record found even though it should be deleted")
 	}
@@ -313,6 +330,7 @@ func TestIdForPostgres(t *testing.T) {
 	if err = db.Where("id = ?", data.ID).Delete(&data).Error; err != nil {
 		t.Fatalf("Error while deleting: %v", err)
 	}
+	result = IdTestStruct{}
 	if err = db.First(&result, "id = ?", data.ID).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		t.Fatalf("Record found even though it should be deleted")
 	}
