@@ -10,7 +10,7 @@ type ID [16]byte
 
 var NilID ID
 
-var NotNullNilId = ID([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
+var NotNullNilID = ID([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1})
 
 func NewID() ID {
 	return ID(ulid.Make())

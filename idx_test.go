@@ -26,17 +26,17 @@ func TestCompare(t *testing.T) {
 	if NilID.Compare(NilID) != 0 {
 		t.Fatalf("NilID should be equal to NilID")
 	}
-	if NilID.Compare(NotNullNilId) != -1 {
+	if NilID.Compare(NotNullNilID) != -1 {
 		t.Fatalf("NilID should be less than NotNullNilId")
 	}
-	if NotNullNilId.Compare(NilID) != 1 {
-		t.Fatalf("NotNullNilId should be greater than NilID")
+	if NotNullNilID.Compare(NilID) != 1 {
+		t.Fatalf("NotNullNilID should be greater than NilID")
 	}
-	if NotNullNilId.Compare(NotNullNilId) != 0 {
-		t.Fatalf("NotNullNilId should be equal to NotNullNilId")
+	if NotNullNilID.Compare(NotNullNilID) != 0 {
+		t.Fatalf("NotNullNilID should be equal to NotNullNilID")
 	}
-	if NotNullNilId.Compare([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2}) != -1 {
-		t.Fatalf("NotNullNilId should be less")
+	if NotNullNilID.Compare([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2}) != -1 {
+		t.Fatalf("NotNullNilID should be less")
 	}
 }
 
