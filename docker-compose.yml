@@ -3,7 +3,7 @@ services:
   exec-test:
     build:
       context: .
-    image: idx:0.0.2
+    image: idx:1.2.4
     volumes:
       - "./:/app"
     networks:
@@ -15,7 +15,7 @@ services:
       - mariadb
     command: "go test ./..."
   postgres:
-    image: postgres:16.0-bookworm
+    image: postgres:16.2-alpine3.19
     restart: always
     environment:
       POSTGRES_PASSWORD: password
@@ -24,7 +24,7 @@ services:
     networks:
       - dev-network
   mariadb:
-    image: mariadb:11.1.2-jammy
+    image: mariadb:11.3.2-jammy
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: password
@@ -53,7 +53,7 @@ services:
     networks:
       - dev-network
   mongo-express:
-    image: mongo-express:1.0.0-20-alpine3.18
+    image: mongo-express:1.0.2-20-alpine3.19
     restart: always
     depends_on:
       - mongo
