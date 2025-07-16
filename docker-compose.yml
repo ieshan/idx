@@ -1,71 +1,39 @@
 services:
   exec-test:
-    build:
-      context: .
-    image: idx:1.2.5
+    image: golang:1.24.5-bookworm
     volumes:
       - "./:/app"
     networks:
-      - dev-network
+      - idx-network
     working_dir: "/app"
     depends_on:
       - mongo
       - postgres
       - mariadb
-    command: "go test ./..."
+    command: "go mod download && go test -tags=integration -v"
   postgres:
-    image: postgres:17.0-alpine3.20
+    image: postgres:17.5-alpine3.22
     restart: always
     environment:
       POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
     networks:
-      - dev-network
+      - idx-network
   mariadb:
-    image: mariadb:11.5.2-ubi9
+    image: mariadb:11.8.2-ubi9
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: password
-    ports:
-      - "3306:3306"
     networks:
-      - dev-network
-  adminer:
-    image: adminer:4.8.1-standalone
-    restart: always
-    ports:
-      - "8080:8080"
-    networks:
-      - dev-network
-    depends_on:
-      - mariadb
-      - postgres
+      - idx-network
   mongo:
-    image: mongo:8.0.3-noble
+    image: mongo:8.0.11-noble
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - "27017:27017"
     networks:
-      - dev-network
-  mongo-express:
-    image: mongo-express:1.0.2-20-alpine3.19
-    restart: always
-    depends_on:
-      - mongo
-    ports:
-      - "8102:8081"
-    environment:
-      ME_CONFIG_MONGODB_ENABLE_ADMIN: true
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-      ME_CONFIG_MONGODB_URL: mongodb://root:password@mongo:27017/
-    networks:
-      - dev-network
+      - idx-network
 networks:
-  dev-network:
+  idx-network:
     driver: bridge
 
