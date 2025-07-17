@@ -1,13 +1,11 @@
-//go:build integration
-// +build integration
-
-package idx
+package main
 
 import (
 	"context"
 	"errors"
 	"testing"
 
+	"github.com/ieshan/idx"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -19,7 +17,7 @@ import (
 
 func TestIdForMongo(t *testing.T) {
 	type IdTestStruct struct {
-		ID    ID     `bson:"_id"`
+		ID    idx.ID `bson:"_id"`
 		Value string `bson:"value"`
 	}
 
@@ -41,7 +39,7 @@ func TestIdForMongo(t *testing.T) {
 	}()
 
 	data := IdTestStruct{
-		ID:    NewID(),
+		ID:    idx.NewID(),
 		Value: "test-1",
 	}
 	if _, err = db.InsertOne(c, &data); err != nil {
@@ -76,8 +74,8 @@ func TestIdForMongo(t *testing.T) {
 
 func TestIdForMySQL(t *testing.T) {
 	type IdTestStruct struct {
-		ID    ID     `gorm:"column:id"`
-		FkID  ID     `gorm:"column:fk_id"`
+		ID    idx.ID `gorm:"column:id"`
+		FkID  idx.ID `gorm:"column:fk_id"`
 		Value string `gorm:"column:value"`
 	}
 	dsn := "root:password@tcp(mariadb:3306)/?charset=utf8mb4&parseTime=True&loc=UTC"
@@ -114,7 +112,7 @@ func TestIdForMySQL(t *testing.T) {
 		t.Fatalf("MySQL table creation error: %v", err)
 	}
 	data := IdTestStruct{
-		ID:    NewID(),
+		ID:    idx.NewID(),
 		Value: "test-1",
 	}
 	// Test create
@@ -126,11 +124,11 @@ func TestIdForMySQL(t *testing.T) {
 	if err = db.First(&result, "id = ?", data.ID).Error; err != nil {
 		t.Fatalf("Error while selecting: %v", err)
 	}
-	if data.ID != result.ID || data.Value != result.Value || data.FkID != NilID {
+	if data.ID != result.ID || data.Value != result.Value || data.FkID != idx.NilID {
 		t.Fatalf("Original value did not match with actual value")
 	}
 	// Test update
-	newTestId := NewID()
+	newTestId := idx.NewID()
 	if err = db.Model(&data).Where("id = ?", data.ID).Updates(map[string]interface{}{"value": "test-2", "fk_id": newTestId}).Error; err != nil {
 		t.Fatalf("Error while updating: %v", err)
 	}
@@ -152,8 +150,8 @@ func TestIdForMySQL(t *testing.T) {
 
 func TestIdForPostgres(t *testing.T) {
 	type IdTestStruct struct {
-		ID    ID     `gorm:"column:id"`
-		FkID  ID     `gorm:"column:fk_id"`
+		ID    idx.ID `gorm:"column:id"`
+		FkID  idx.ID `gorm:"column:fk_id"`
 		Value string `gorm:"column:value"`
 	}
 	dsnOp := "host=postgres user=postgres password=password port=5432 sslmode=disable TimeZone=UTC"
@@ -197,7 +195,7 @@ func TestIdForPostgres(t *testing.T) {
 		t.Fatalf("Postgres table creation error: %v", err)
 	}
 	data := IdTestStruct{
-		ID:    NewID(),
+		ID:    idx.NewID(),
 		Value: "test-1",
 	}
 	// Test create
@@ -213,7 +211,7 @@ func TestIdForPostgres(t *testing.T) {
 		t.Fatalf("Original value did not match with actual value")
 	}
 	// Test update
-	newTestId := NewID()
+	newTestId := idx.NewID()
 	if err = db.Model(&data).Where("id = ?", data.ID).Updates(map[string]interface{}{"value": "test-2", "fk_id": newTestId}).Error; err != nil {
 		t.Fatalf("Error while updating: %v", err)
 	}
@@ -235,8 +233,8 @@ func TestIdForPostgres(t *testing.T) {
 
 func TestIdForSQLite(t *testing.T) {
 	type IdTestStruct struct {
-		ID    ID     `gorm:"column:id"`
-		FkID  ID     `gorm:"column:fk_id"`
+		ID    idx.ID `gorm:"column:id"`
+		FkID  idx.ID `gorm:"column:fk_id"`
 		Value string `gorm:"column:value"`
 	}
 
@@ -260,7 +258,7 @@ func TestIdForSQLite(t *testing.T) {
 	}
 
 	data := IdTestStruct{
-		ID:    NewID(),
+		ID:    idx.NewID(),
 		Value: "test-1",
 	}
 
@@ -274,12 +272,12 @@ func TestIdForSQLite(t *testing.T) {
 	if err = db.First(&result, "id = ?", data.ID).Error; err != nil {
 		t.Fatalf("Error while selecting: %v", err)
 	}
-	if data.ID != result.ID || data.Value != result.Value || result.FkID != NilID {
+	if data.ID != result.ID || data.Value != result.Value || result.FkID != idx.NilID {
 		t.Fatalf("Original value did not match with actual value")
 	}
 
 	// Test update
-	newTestId := NewID()
+	newTestId := idx.NewID()
 	if err = db.Model(&data).Where("id = ?", data.ID).Updates(map[string]interface{}{"value": "test-2", "fk_id": newTestId}).Error; err != nil {
 		t.Fatalf("Error while updating: %v", err)
 	}
