@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"testing"
-
 	"github.com/oklog/ulid/v2"
+	"testing"
 )
 
 func TestNewID(t *testing.T) {
