@@ -3,6 +3,7 @@ package idx
 import (
 	"database/sql/driver"
 	"encoding/json"
+
 	"github.com/oklog/ulid/v2"
 )
 
