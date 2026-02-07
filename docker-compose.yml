@@ -10,7 +10,7 @@ services:
 
   # Integration tests with all databases - using workspace
   integration-tests:
-    image: golang:1.24.5-bookworm
+    image: golang:1.25.7-trixie
     volumes:
       - "./:/app"
     networks:
@@ -28,7 +28,7 @@ services:
 
   # Go workspace commands - for running go commands across all workspaces
   go-workspace:
-    image: golang:1.24.5-bookworm
+    image: golang:1.25.7-trixie
     volumes:
       - "./:/app"
     networks:
@@ -46,7 +46,7 @@ services:
 
   # Run all tests (unit + integration) - using workspace
   all-tests:
-    image: golang:1.24.5-bookworm
+    image: golang:1.25.7-trixie
     volumes:
       - "./:/app"
     networks:
@@ -63,7 +63,7 @@ services:
     profiles: ["all"]
   # Database services with health checks
   postgres:
-    image: postgres:17.5-alpine3.22
+    image: postgres:18.1-alpine3.23
     restart: always
     environment:
       POSTGRES_PASSWORD: password
@@ -76,7 +76,7 @@ services:
       retries: 5
 
   mariadb:
-    image: mariadb:11.8.2-ubi9
+    image: mariadb:12.1.2-ubi10
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: password
@@ -89,7 +89,7 @@ services:
       retries: 5
 
   mongo:
-    image: mongo:8.0.11-noble
+    image: mongo:8.2.4-noble
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -105,4 +105,3 @@ services:
 networks:
   idx-network:
     driver: bridge
-
