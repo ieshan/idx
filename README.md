@@ -60,8 +60,8 @@ This library uses **Go workspaces** to completely separate database dependencies
 # Run unit tests only - ultra fast (1-2ms)
 go test -v
 
-# Or using Docker
-docker-compose --profile unit up unit-tests --abort-on-container-exit
+# Or using Docker + Makefile
+make test-unit
 ```
 
 ### Integration Tests (Separate Module with Database Dependencies)
@@ -70,18 +70,15 @@ docker-compose --profile unit up unit-tests --abort-on-container-exit
 # Run integration tests from workspace
 cd integration-tests && go test -v
 
-# Or using Docker
-docker-compose --profile integration up integration-tests --abort-on-container-exit
+# Or using Docker + Makefile (starts databases automatically)
+make test-integration
 ```
 
 ### All Tests
 
 ```bash
 # Run both unit and integration tests
-docker-compose --profile all up all-tests --abort-on-container-exit
-
-# Or the default service (backward compatibility)
-docker-compose up exec-test --abort-on-container-exit
+make test-all
 ```
 
 ## Go Workspace Architecture
@@ -97,7 +94,8 @@ idx/
 ├── integration-tests/        # Separate module for database tests
 │   ├── go.mod               # Database dependencies isolated here
 │   └── idx_integration_test.go # Database integration tests
-└── docker-compose.yml       # Multi-profile testing setup
+├── docker-compose.yml       # Single app service + databases
+└── Makefile                 # Test orchestration commands
 ```
 
 ### Why Go Workspaces?
@@ -125,26 +123,31 @@ go test                              # 1-2ms unit tests
 # Full testing when needed  
 cd integration-tests && go test     # 100ms database tests
 
-# Docker-based testing
-docker-compose --profile all up all-tests --abort-on-container-exit
+# Docker + Makefile (recommended)
+make test-unit                      # Fast unit tests
+make test-integration               # Database integration tests
+make test-all                       # Everything
 ```
 
-## Docker Compose Services
+## Makefile Targets
 
-The enhanced `docker-compose.yml` provides multiple testing scenarios:
+The `Makefile` provides simple commands for all testing scenarios:
 
-| Service | Command | Purpose | Speed |
+| Target | Command | Purpose | Speed |
 |---------|---------|---------|-------|
-| `unit-tests` | `docker-compose --profile unit up unit-tests --abort-on-container-exit` | Fast unit tests only | ⚡ ~2ms |
-| `integration-tests` | `docker-compose --profile integration up integration-tests --abort-on-container-exit` | Database integration tests | 🔧 ~100ms |
-| `all-tests` | `docker-compose --profile all up all-tests --abort-on-container-exit` | Sequential unit + integration | 📊 Complete |
-| `exec-test` | `docker-compose up exec-test --abort-on-container-exit` | Default (backward compatibility) | 🔄 Legacy |
+| `test-unit` | `make test-unit` | Fast unit tests only | ⚡ ~2ms |
+| `test-integration` | `make test-integration` | Database integration tests | 🔧 ~100ms |
+| `test-all` | `make test-all` | Unit + integration tests | 📊 Complete |
+| `shell` | `make shell` | Interactive shell with DBs running | 🖥️ Dev |
+| `db-up` | `make db-up` | Start database services | 🔧 Setup |
+| `db-down` | `make db-down` | Stop all services | 🛑 Cleanup |
+| `clean` | `make clean` | Remove volumes and orphans | 🧹 Reset |
 
 ### Key Features
 
-1. **Health Checks**: Database services include health checks to ensure they're ready before tests run
-2. **Workspace Support**: Commands handle both modules correctly
-3. **Profiles**: Different Docker Compose profiles for different testing scenarios
+1. **Single Service**: One `app` service in `docker-compose.yml` — commands are injected via `make`
+2. **Health Checks**: Database services include health checks to ensure they're ready before tests run
+3. **Workspace Support**: Commands handle both modules correctly
 4. **Clear Output**: Tests include descriptive banners showing what's running
 5. **True Isolation**: Unit tests run without any database dependencies
 
@@ -197,7 +200,7 @@ require (
 
 1. Make sure unit tests pass: `go test -v`
 2. Make sure integration tests pass: `cd integration-tests && go test -v`
-3. Or use Docker: `docker-compose --profile all up all-tests --abort-on-container-exit`
+3. Or use Docker + Makefile: `make test-all`
 
 ## License
 

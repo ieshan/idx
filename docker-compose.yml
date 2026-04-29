@@ -1,69 +1,17 @@
 services:
-  # Fast unit tests only - no database dependencies
-  unit-tests:
-    image: golang:1.24.5-bookworm
-    volumes:
-      - "./:/app"
-    working_dir: "/app"
-    command: sh -c "go mod download && echo '=== Running Unit Tests (Fast) ===' && go test -v"
-    profiles: ["unit"]
-
-  # Integration tests with all databases - using workspace
-  integration-tests:
-    image: golang:1.25.7-trixie
+  # Main app service for running tests and Go commands
+  app:
+    image: golang:1.26.2-trixie
     volumes:
       - "./:/app"
     networks:
       - idx-network
     working_dir: "/app"
-    depends_on:
-      mongo:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      mariadb:
-        condition: service_healthy
-    command: sh -c "go mod download && cd integration-tests && go mod download && echo '=== Running Integration Tests (With Databases) ===' && go test -v"
-    profiles: ["integration"]
-
-  # Go workspace commands - for running go commands across all workspaces
-  go-workspace:
-    image: golang:1.25.7-trixie
-    volumes:
-      - "./:/app"
-    networks:
-      - idx-network
-    working_dir: "/app"
-    depends_on:
-      mongo:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      mariadb:
-        condition: service_healthy
-    # Override command when running
-    command: bash
-
-  # Run all tests (unit + integration) - using workspace
-  all-tests:
-    image: golang:1.25.7-trixie
-    volumes:
-      - "./:/app"
-    networks:
-      - idx-network
-    working_dir: "/app"
-    depends_on:
-      mongo:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      mariadb:
-        condition: service_healthy
-    command: sh -c "go mod download && cd integration-tests && go mod download && cd .. && echo '=== Running Unit Tests ===' && go test -v && echo '=== Running Integration Tests ===' && cd integration-tests && go test -v && echo '=== All Tests Completed Successfully! ==='"
-    profiles: ["all"]
+    # Default: run unit tests. Override via `docker compose run --rm app <command>`
+    command: go test -v
   # Database services with health checks
   postgres:
-    image: postgres:18.1-alpine3.23
+    image: postgres:18.3-alpine3.23
     restart: always
     environment:
       POSTGRES_PASSWORD: password
@@ -76,7 +24,7 @@ services:
       retries: 5
 
   mariadb:
-    image: mariadb:12.1.2-ubi10
+    image: mariadb:12.2.2-ubi10
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: password
@@ -89,7 +37,7 @@ services:
       retries: 5
 
   mongo:
-    image: mongo:8.2.4-noble
+    image: mongo:8.2.7-noble
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -97,7 +45,7 @@ services:
     networks:
       - idx-network
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand(\"ping\")' -u root -p password --authenticationDatabase admin"]
       interval: 5s
       timeout: 5s
       retries: 5
