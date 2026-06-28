@@ -254,4 +254,4 @@ require (
 
 ## License
 
-Private
+MIT
