@@ -1,5 +1,9 @@
 # IDX - ULID-based ID Management Library
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/ieshan/idx.svg)](https://pkg.go.dev/github.com/ieshan/idx)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ieshan/idx)](https://goreportcard.com/report/github.com/ieshan/idx)
+
+
 A Go library providing ULID-based unique identifier management with comprehensive database support.
 
 ## Features
