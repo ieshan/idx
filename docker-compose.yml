@@ -1,7 +1,7 @@
 services:
   # Main app service for running tests and Go commands
   app:
-    image: golang:1.26.2-trixie
+    image: golang:1.26.4-trixie
     volumes:
       - "./:/app"
     networks:
@@ -11,7 +11,7 @@ services:
     command: go test -v
   # Database services with health checks
   postgres:
-    image: postgres:18.3-alpine3.23
+    image: postgres:18.4-alpine3.24
     restart: always
     environment:
       POSTGRES_PASSWORD: password
@@ -24,7 +24,7 @@ services:
       retries: 5
 
   mariadb:
-    image: mariadb:12.2.2-ubi10
+    image: mariadb:12.3.2-ubi10
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: password
@@ -37,7 +37,7 @@ services:
       retries: 5
 
   mongo:
-    image: mongo:8.2.7-noble
+    image: mongo:8.3.4-noble
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
