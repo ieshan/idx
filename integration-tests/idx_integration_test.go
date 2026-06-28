@@ -47,27 +47,27 @@ func TestIdForMongo(t *testing.T) {
 	}
 
 	var actualData IdTestStruct
-	if err = db.FindOne(c, bson.D{{"_id", data.ID}}).Decode(&actualData); err != nil {
+	if err = db.FindOne(c, bson.D{{Key: "_id", Value: data.ID}}).Decode(&actualData); err != nil {
 		t.Fatalf("Error retrieving record: %v", err)
 	}
 	if data.ID != actualData.ID || data.Value != actualData.Value {
 		t.Fatalf("Original value did not match with actual value")
 	}
 
-	if _, err = db.UpdateOne(c, bson.D{{"_id", data.ID}}, bson.D{{"$set", bson.D{{"value", "test-2"}}}}); err != nil {
+	if _, err = db.UpdateOne(c, bson.D{{Key: "_id", Value: data.ID}}, bson.D{{Key: "$set", Value: bson.D{{Key: "value", Value: "test-2"}}}}); err != nil {
 		t.Fatalf("Error updating record: %v", err)
 	}
-	if err = db.FindOne(c, bson.D{{"_id", data.ID}}).Decode(&actualData); err != nil {
+	if err = db.FindOne(c, bson.D{{Key: "_id", Value: data.ID}}).Decode(&actualData); err != nil {
 		t.Fatalf("Error retrieving record: %v", err)
 	}
 	if data.ID != actualData.ID || actualData.Value != "test-2" {
 		t.Fatalf("Original value did not match with actual value")
 	}
 
-	if _, err = db.DeleteOne(c, bson.D{{"_id", data.ID}}); err != nil {
+	if _, err = db.DeleteOne(c, bson.D{{Key: "_id", Value: data.ID}}); err != nil {
 		t.Fatalf("Error deleting record: %v", err)
 	}
-	if err = db.FindOne(c, bson.D{{"_id", data.ID}}).Decode(&actualData); !errors.Is(err, mongo.ErrNoDocuments) {
+	if err = db.FindOne(c, bson.D{{Key: "_id", Value: data.ID}}).Decode(&actualData); !errors.Is(err, mongo.ErrNoDocuments) {
 		t.Fatalf("Was expecting no document error, got %v", err)
 	}
 }
